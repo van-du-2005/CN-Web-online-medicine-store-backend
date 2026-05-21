@@ -3,10 +3,14 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// 1. KÍCH HOẠT TÍNH NĂNG ĐỌC CONTROLLER (Cực kỳ quan trọng)
+builder.Services.AddControllers();
 
+// 2. KÍCH HOẠT GIAO DIỆN SWAGGER ĐỂ TEST API
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Kết nối Database
 builder.Services.AddDbContext<OnlineMedicineStoreCNWDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -19,7 +23,6 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<OnlineMedicineStoreCNWDbContext>();
-        // Chạy Seed Data (bên trong hàm này đã có lệnh MigrateAsync tự tạo DB)
         await DbInitializer.SeedDataAsync(context);
     }
     catch (Exception ex)
@@ -29,36 +32,16 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
+// 3. HIỂN THỊ GIAO DIỆN WEB SWAGGER (Chỉ hiện khi code ở máy cá nhân)
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+// 4. ÁNH XẠ CÁC ĐƯỜNG DẪN API VÀO CONTROLLER
+app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
