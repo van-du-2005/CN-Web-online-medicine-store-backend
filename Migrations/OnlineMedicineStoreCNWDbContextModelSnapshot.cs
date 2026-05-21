@@ -10,8 +10,8 @@ using OnlineMedicineStoreBackend.Data;
 
 namespace OnlineMedicineStoreBackend.Migrations
 {
-    [DbContext(typeof(OnlineMedicineStoreCNWDbContext))]
-    partial class OnlineMedicineStoreCNWDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(OnlineMedicineStoreDbContext))]
+    partial class OnlineMedicineStoreDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

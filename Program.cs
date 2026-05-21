@@ -1,14 +1,31 @@
 using OnlineMedicineStoreBackend.Data;
 using Microsoft.EntityFrameworkCore;
+using OnlineMedicineStoreBackend.Services;      // Khai báo nơi chứa Đầu bếp
+using OnlineMedicineStoreBackend.Repositories;  // Khai báo nơi chứa Kho dữ liệu
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddDbContext<OnlineMedicineStoreCNWDbContext>(options =>
+builder.Services.AddDbContext<OnlineMedicineStoreDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Bơm nguyên liệu cho Controller hoạt động
+builder.Services.AddControllers();
+
+// === ĐĂNG KÝ KẾT NỐI (DEPENDENCY INJECTION) ===
+// Bước cực kỳ quan trọng để ThuocController có thể gọi được ProductService
+builder.Services.AddScoped<IThuocRepository, ThuocRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
+
+// === ĐĂNG KÝ KẾT NỐI (DEPENDENCY INJECTION) ===
+builder.Services.AddScoped<IThuocRepository, ThuocRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
+
+// THÊM 2 DÒNG NÀY VÀO:
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
@@ -18,7 +35,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        var context = services.GetRequiredService<OnlineMedicineStoreCNWDbContext>();
+        var context = services.GetRequiredService<OnlineMedicineStoreDbContext>();
         // Chạy Seed Data (bên trong hàm này đã có lệnh MigrateAsync tự tạo DB)
         await DbInitializer.SeedDataAsync(context);
     }
@@ -37,28 +54,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+// Chỉ đường cho các API
+app.MapControllers();
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
+// Chỉ được gọi 1 lần duy nhất ở cuối file
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
