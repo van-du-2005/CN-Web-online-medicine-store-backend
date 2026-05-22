@@ -3,19 +3,31 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. KÍCH HOẠT TÍNH NĂNG ĐỌC CONTROLLER (Cực kỳ quan trọng)
+// 1. KÍCH HOẠT TÍNH NĂNG ĐỌC CONTROLLER
 builder.Services.AddControllers();
 
 // 2. KÍCH HOẠT GIAO DIỆN SWAGGER ĐỂ TEST API
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Kết nối Database
+// 3. KẾT NỐI DATABASE
 builder.Services.AddDbContext<OnlineMedicineStoreCNWDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-var app = builder.Build();
+// 4. CẤP VISA CHO FRONTEND (Chỉ cần 1 cục này thôi)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+});
 
+var app = builder.Build();
+app.UseStaticFiles();
 // ---SEED DATA ---
 using (var scope = app.Services.CreateScope())
 {
@@ -32,16 +44,22 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// 3. HIỂN THỊ GIAO DIỆN WEB SWAGGER (Chỉ hiện khi code ở máy cá nhân)
+// HIỂN THỊ GIAO DIỆN WEB SWAGGER 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// ==========================================
+// THỨ TỰ MIDDLEWARE CHUẨN CHỈNH (Đừng đổi chỗ nha sếp)
+// ==========================================
 app.UseHttpsRedirection();
 
-// 4. ÁNH XẠ CÁC ĐƯỜNG DẪN API VÀO CONTROLLER
-app.MapControllers();
+app.UseStaticFiles(); // 1. Mở cửa kho cho phép đọc file tĩnh (ảnh, css...)
+app.UseRouting();     // 2. Bật định tuyến
+app.UseCors("AllowAll"); // 3. Kiểm tra thẻ Visa (CORS)
+
+app.MapControllers(); // 4. Vào Controller lấy dữ liệu
 
 app.Run();
