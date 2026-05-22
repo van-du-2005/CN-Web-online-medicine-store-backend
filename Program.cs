@@ -56,9 +56,12 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IGioHangRepository, GioHangRepository>();
 builder.Services.AddScoped<IDonHangRepository, DonHangRepository>();
+builder.Services.AddScoped<IThuocRepository, ThuocRepository>();
+
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IZaloPayService, ZaloPayService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 // cấu hình CORS để cho phép Frontend Angular truy cập API
 builder.Services.AddCors(options =>

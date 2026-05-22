@@ -11,7 +11,7 @@ using OnlineMedicineStoreBackend.Data;
 
 namespace OnlineMedicineStoreBackend.Migrations
 {
-    [DbContext(typeof(OnlineMedicineStoreDbContext))]
+    [DbContext(typeof(OnlineMedicineStoreCNWDbContext))]
     [Migration("20260519083859_InitialCreate")]
     partial class InitialCreate
     {

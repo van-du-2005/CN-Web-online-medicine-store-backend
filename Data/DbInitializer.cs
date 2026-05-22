@@ -6,7 +6,7 @@ namespace OnlineMedicineStoreBackend.Data
 {
     public static class DbInitializer
     {
-        public static async Task SeedDataAsync(OnlineMedicineStoreDbContext context)
+        public static async Task SeedDataAsync(OnlineMedicineStoreCNWDbContext context)
         {
             // Tự động chạy Migration để tạo Database nếu chưa có
             await context.Database.MigrateAsync();

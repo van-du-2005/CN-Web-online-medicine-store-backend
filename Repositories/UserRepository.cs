@@ -6,9 +6,9 @@ namespace OnlineMedicineStoreBackend.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly OnlineMedicineStoreDbContext _context;
+        private readonly OnlineMedicineStoreCNWDbContext _context;
 
-        public UserRepository(OnlineMedicineStoreDbContext context)
+        public UserRepository(OnlineMedicineStoreCNWDbContext context)
         {
             _context = context;
         }
