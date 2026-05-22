@@ -1,10 +1,57 @@
 using OnlineMedicineStoreBackend.Data;
 using Microsoft.EntityFrameworkCore;
-using OnlineMedicineStoreBackend.Services;
-using OnlineMedicineStoreBackend.Repositories;
+using OnlineMedicineStoreBackend.Middleware; 
+using OnlineMedicineStoreBackend.Repositories; 
+using OnlineMedicineStoreBackend.Services.auth;    
+using OnlineMedicineStoreBackend.Services; 
+using OnlineMedicineStoreBackend.utils;    
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text; 
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
+
+builder.Services.AddAuthorization(); // Kích hoạt dịch vụ phân quyền
+
+// Add services to the container.
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
+
+builder.Services.AddControllers();
+
+builder.Services.AddDbContext<OnlineMedicineStoreCNWDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// ---------------------auth---------------
+builder.Services.AddMemoryCache(); // Kích hoạt Cache
+builder.Services.AddScoped<JwtUtils>();
+builder.Services.AddScoped<IUserDRepository, UserDRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>(); 
+
+// ---------------------khách hàng---------------
+
+// account liên quan đến khách hàng 
+builder.Services.AddScoped<IAccountDRepository, AccountDRepository>();
+builder.Services.AddScoped<IAccountDService, AccountDService>();
+
+
+// cấu hình CORS để cho phép Frontend Angular truy cập API
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
@@ -12,26 +59,9 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("http://localhost:4200") 
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials();
+              .AllowCredentials(); // hỗ trợ Cookie bảo mật
     });
 });
-
-builder.Services.AddControllers();
-
-builder.Services.AddOpenApi();
-
-builder.Services.AddDbContext<OnlineMedicineStoreCNWDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// Đăng ký các service và repository
-// Đăng ký các repository và UnitOfWork
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped<IGioHangRepository, GioHangRepository>();
-builder.Services.AddScoped<IDonHangRepository, DonHangRepository>();
-
-// Đăng ký các service
-builder.Services.AddScoped<ICartService, CartService>();
 
 var app = builder.Build();
 
@@ -57,6 +87,9 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// MIDDLEWARE BẮT LỖI TOÀN CỤC
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -64,6 +97,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAngular");
+
+app.UseAuthentication(); // Bật xác thực trước khi phân quyền
+app.UseAuthorization();  // Bật phân quyền sau khi đã xác thực
+
+app.MapControllers();
 
 var summaries = new[]
 {
