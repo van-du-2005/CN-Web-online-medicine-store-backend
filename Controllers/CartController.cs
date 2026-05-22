@@ -8,12 +8,11 @@ namespace OnlineMedicineStoreBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Đặt Authorize ở mức class để bảo vệ toàn bộ API, Angular bắt buộc phải gửi Token
+    [Authorize]
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
 
-        // Đã loại bỏ IAuthService vì .NET cung cấp sẵn cách lấy Claim chuẩn và an toàn hơn
         public CartController(ICartService cartService)
         {
             _cartService = cartService;
@@ -21,7 +20,6 @@ namespace OnlineMedicineStoreBackend.Controllers
 
         private Guid GetUserId()
         {
-            // Tối ưu hóa việc lấy UserID trực tiếp từ Bearer Token
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             return Guid.TryParse(userIdClaim, out Guid userId) ? userId : Guid.Empty;
         }

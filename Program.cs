@@ -5,9 +5,6 @@ using OnlineMedicineStoreBackend.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
@@ -26,6 +23,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<OnlineMedicineStoreCNWDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Đăng ký các service và repository
 // Đăng ký các repository và UnitOfWork
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -36,6 +34,11 @@ builder.Services.AddScoped<IDonHangRepository, DonHangRepository>();
 builder.Services.AddScoped<ICartService, CartService>();
 
 var app = builder.Build();
+
+app.UseCors("AllowAngular");
+app.UseAuthorization();
+app.UseAuthentication();
+app.MapControllers();
 
 // ---SEED DATA ---
 using (var scope = app.Services.CreateScope())
