@@ -50,6 +50,13 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAccountDRepository, AccountDRepository>();
 builder.Services.AddScoped<IAccountDService, AccountDService>();
 
+// cart liên quan đến khách hàng
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IGioHangRepository, GioHangRepository>();
+builder.Services.AddScoped<IDonHangRepository, DonHangRepository>();
+builder.Services.AddScoped<ICartService, CartService>();
 
 // cấu hình CORS để cho phép Frontend Angular truy cập API
 builder.Services.AddCors(options =>
