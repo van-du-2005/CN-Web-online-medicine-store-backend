@@ -8,6 +8,8 @@ using OnlineMedicineStoreBackend.utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text; 
+using OnlineMedicineStoreBackend.Repositories.admin;
+using OnlineMedicineStoreBackend.Services.admin;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,18 +39,20 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<OnlineMedicineStoreCNWDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ---------------------auth---------------
+// ---------------------đăng kí services, repository auth---------------
 builder.Services.AddMemoryCache(); // Kích hoạt Cache
 builder.Services.AddScoped<JwtUtils>();
 builder.Services.AddScoped<IUserDRepository, UserDRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>(); 
 
-// ---------------------khách hàng---------------
-
-// account liên quan đến khách hàng 
+// ---------------------đăng kí services, repository khách hàng---------------
 builder.Services.AddScoped<IAccountDRepository, AccountDRepository>();
 builder.Services.AddScoped<IAccountDService, AccountDService>();
+
+// ---------------------đăng kí services, repository admin---------------
+builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 
 // cấu hình CORS để cho phép Frontend Angular truy cập API
