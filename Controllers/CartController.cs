@@ -21,6 +21,7 @@ namespace OnlineMedicineStoreBackend.Controllers
         private Guid GetUserId()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             return Guid.TryParse(userIdClaim, out Guid userId) ? userId : Guid.Empty;
         }
 
@@ -32,7 +33,7 @@ namespace OnlineMedicineStoreBackend.Controllers
                 return Unauthorized(new { success = false, message = "Token không hợp lệ." });
 
             var cartDto = await _cartService.GetCartAsync(userId);
-            return Ok(new { success = true, data = cartDto ?? new CartDto() });
+            return Ok(new { success = true, data = cartDto ?? new CartDto { Items = new List<CartItemDto>() } });
         }
 
         [HttpPost("add")]
@@ -72,8 +73,8 @@ namespace OnlineMedicineStoreBackend.Controllers
         }
 
         // Tối ưu thành HttpDelete chuẩn RESTful, truyền tham số trực tiếp trên URL thay vì Body
-        [HttpDelete("remove-item/{productId}")]
-        public async Task<IActionResult> RemoveItem(Guid productId)
+        [HttpDelete("remove-item/{productId:guid}")]
+        public async Task<IActionResult> RemoveItem([FromRoute] Guid productId)
         {
             var userId = GetUserId();
             if (userId == Guid.Empty) 

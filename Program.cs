@@ -57,6 +57,8 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped<IGioHangRepository, GioHangRepository>();
 builder.Services.AddScoped<IDonHangRepository, DonHangRepository>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IZaloPayService, ZaloPayService>();
 
 // cấu hình CORS để cho phép Frontend Angular truy cập API
 builder.Services.AddCors(options =>
@@ -71,11 +73,6 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
-app.UseCors("AllowAngular");
-app.UseAuthorization();
-app.UseAuthentication();
-app.MapControllers();
 
 // ---SEED DATA ---
 using (var scope = app.Services.CreateScope())

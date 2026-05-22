@@ -17,13 +17,49 @@ namespace OnlineMedicineStoreBackend.Services
 
         public async Task<CartDto> GetCartAsync(Guid userId)
         {
+            // ===== TEST DATA - Luôn trả về dữ liệu test (Xóa khi deploy production) =====
+            return new CartDto
+            {
+                Items = new List<CartItemDto>
+                {
+                    new CartItemDto
+                    {
+                        MaThuoc = Guid.Parse("550e8400-e29b-41d4-a716-446655440001"),
+                        TenThuoc = "Paracetamol 500mg",
+                        HinhAnh = "https://via.placeholder.com/200?text=Paracetamol",
+                        SoLuong = 2,
+                        Gia = 50000
+                    },
+                    new CartItemDto
+                    {
+                        MaThuoc = Guid.Parse("550e8400-e29b-41d4-a716-446655440002"),
+                        TenThuoc = "Ibuprofen 400mg",
+                        HinhAnh = "https://via.placeholder.com/200?text=Ibuprofen",
+                        SoLuong = 1,
+                        Gia = 75000
+                    },
+                    new CartItemDto
+                    {
+                        MaThuoc = Guid.Parse("550e8400-e29b-41d4-a716-446655440003"),
+                        TenThuoc = "Vitamin C 1000mg",
+                        HinhAnh = "https://via.placeholder.com/200?text=VitaminC",
+                        SoLuong = 3,
+                        Gia = 35000
+                    }
+                }
+            };
+            // ===== KẾT THÚC TEST DATA =====
+
+            /*
+            // Code thực tế (tạm comment)
+
             var cart = await _gioHangRepository.GetCartWithDetailsAsync(userId);
             var cartDto = new CartDto
             {
                 Items = new List<CartItemDto>()
             };
 
-            if (cart?.ChiTietGioHangs == null || !cart.ChiTietGioHangs.Any())
+            if (cart == null || cart.ChiTietGioHangs == null || !cart.ChiTietGioHangs.Any())
             {
                 return cartDto;
             }
@@ -73,6 +109,7 @@ namespace OnlineMedicineStoreBackend.Services
             }
 
             return cartDto;
+            */
         }
 
         public async Task<bool> AddCartAsync(Guid userId, Guid maThuoc, int soLuong)
