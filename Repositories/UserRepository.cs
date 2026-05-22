@@ -15,12 +15,27 @@ namespace OnlineMedicineStoreBackend.Repositories
 
         public async Task<IEnumerable<NguoiDung>> GetAllUsersAsync()
         {
-            return await _context.NguoiDungs.ToListAsync();
+            // Sắp xếp người mới tạo lên đầu
+            return await _context.NguoiDungs.OrderByDescending(u => u.NgayTao).ToListAsync();
         }
 
         public async Task<NguoiDung?> GetUserByIdAsync(Guid id)
         {
             return await _context.NguoiDungs.FindAsync(id);
+        }
+
+        public async Task<NguoiDung> AddUserAsync(NguoiDung user)
+        {
+            _context.NguoiDungs.Add(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<NguoiDung> UpdateUserAsync(NguoiDung user)
+        {
+            _context.NguoiDungs.Update(user);
+            await _context.SaveChangesAsync();
+            return user;
         }
 
         public async Task<bool> DeleteUserAsync(Guid id)

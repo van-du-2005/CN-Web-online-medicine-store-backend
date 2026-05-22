@@ -34,14 +34,12 @@ namespace OnlineMedicineStoreBackend.Services
             return await _thuocRepository.GetByIdAsync(id);
         }
 
-        // --- HÀM THÊM SẢN PHẨM ---
         public async Task<Thuoc> AddThuocAsync(Thuoc thuoc)
         {
-            thuoc.MaThuoc = Guid.NewGuid(); // Tự động tạo mã ID mới không bị trùng
+            thuoc.MaThuoc = Guid.NewGuid(); // Tự động tạo mã ID mới
             return await _thuocRepository.AddAsync(thuoc);
         }
 
-        // --- HÀM XÓA SẢN PHẨM ---
         public async Task<bool> DeleteThuocAsync(Guid id)
         {
             return await _thuocRepository.DeleteAsync(id);

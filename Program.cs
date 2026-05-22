@@ -5,6 +5,15 @@ using OnlineMedicineStoreBackend.Repositories;  // Khai báo nơi chứa Kho d�
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 // Add services to the container.
 builder.Services.AddOpenApi();
 
@@ -13,6 +22,12 @@ builder.Services.AddDbContext<OnlineMedicineStoreDbContext>(options =>
 
 // Bơm nguyên liệu cho Controller hoạt động
 builder.Services.AddControllers();
+
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowAll", policy => {
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
+});
 
 // === ĐĂNG KÝ KẾT NỐI (DEPENDENCY INJECTION) ===
 // Bước cực kỳ quan trọng để ThuocController có thể gọi được ProductService
@@ -54,8 +69,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowAngular");
 // Chỉ đường cho các API
 app.MapControllers();
 
+app.UseCors("AllowAll");
 // Chỉ được gọi 1 lần duy nhất ở cuối file
 app.Run();
