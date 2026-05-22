@@ -53,6 +53,9 @@ builder.Services.AddScoped<IAccountDService, AccountDService>();
 // ---------------------đăng kí services, repository admin---------------
 builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IOrderRepositoryAdmin, OrderRepositoryAdmin>();
+builder.Services.AddScoped<IOrderServiceAdmin, OrderServiceAdmin>();
+
 
 
 // cấu hình CORS để cho phép Frontend Angular truy cập API
@@ -66,6 +69,8 @@ builder.Services.AddCors(options =>
               .AllowCredentials(); // hỗ trợ Cookie bảo mật
     });
 });
+
+
 
 var app = builder.Build();
 
@@ -85,6 +90,7 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "Có lỗi xảy ra khi khởi tạo Database.");
     }
 }
+
 
 // MIDDLEWARE BẮT LỖI TOÀN CỤC
 app.UseMiddleware<GlobalExceptionMiddleware>();
