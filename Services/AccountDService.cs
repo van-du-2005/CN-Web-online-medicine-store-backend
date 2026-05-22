@@ -75,6 +75,9 @@ namespace OnlineMedicineStoreBackend.Services
                 MaDonHang = o.MaDonHang,
                 NgayDat = o.NgayDat,
                 TrangThai = o.TrangThai,
+                TamTinh = o.TamTinh,
+                PhiVanChuyen = o.PhiVanChuyen,
+                GiamGia = o.GiamGia,
                 ThanhToan = o.ThanhToan,
                 ChiTiet = o.ChiTietDonHangs.Select(ct => new OrderDetailDto
                 {
