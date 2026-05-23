@@ -10,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text; 
 using OnlineMedicineStoreBackend.Repositories.admin;
 using OnlineMedicineStoreBackend.Services.admin;
+using Microsoft.Extensions.AI;
+using Mscc.GenerativeAI.Microsoft;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +31,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization(); // Kích hoạt dịch vụ phân quyền
+
+var aiConfig = builder.Configuration.GetSection("GoogleGeminiAI");
+string apiKey = aiConfig["ApiKey"] ?? throw new Exception("Chưa tồn tại API key cho Google Gemini AI");
+string model = aiConfig["Model"] ?? throw new Exception("Chưa tồn tại model cho Google Gemini AI");
+builder.Services.AddChatClient(new GeminiChatClient(apiKey: apiKey, model: model));
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -57,6 +64,18 @@ builder.Services.AddScoped<IOrderRepositoryAdmin, OrderRepositoryAdmin>();
 builder.Services.AddScoped<IOrderServiceAdmin, OrderServiceAdmin>();
 
 
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IGioHangRepository, GioHangRepository>();
+builder.Services.AddScoped<IDonHangRepository, DonHangRepository>();
+builder.Services.AddScoped<IThuocRepository, ThuocRepository>();
+
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IZaloPayService, ZaloPayService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IChatbotService, ChatbotService>();
 
 // cấu hình CORS để cho phép Frontend Angular truy cập API
 builder.Services.AddCors(options =>

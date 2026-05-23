@@ -4,7 +4,7 @@ using OnlineMedicineStoreBackend.Models;
 
 namespace OnlineMedicineStoreBackend.Data
 {
-    public class OnlineMedicineStoreCNWDbContext : DbContext
+    public class OnlineMedicineStoreCNWDbContext  : DbContext
     {
         public OnlineMedicineStoreCNWDbContext(DbContextOptions<OnlineMedicineStoreCNWDbContext> options) : base(options)
         {
