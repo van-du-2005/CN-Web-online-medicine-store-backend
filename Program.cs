@@ -12,6 +12,8 @@ using OnlineMedicineStoreBackend.Repositories.admin;
 using OnlineMedicineStoreBackend.Services.admin;
 using Microsoft.Extensions.AI;
 using Mscc.GenerativeAI.Microsoft;
+using Microsoft.Extensions.AI;
+using Mscc.GenerativeAI.Microsoft; 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +45,14 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddControllers();
 
+// 1. KÍCH HOẠT TÍNH NĂNG ĐỌC CONTROLLER
+builder.Services.AddControllers();
+
+// 2. KÍCH HOẠT GIAO DIỆN SWAGGER ĐỂ TEST API
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// 3. KẾT NỐI DATABASE
 builder.Services.AddDbContext<OnlineMedicineStoreCNWDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -64,6 +74,7 @@ builder.Services.AddScoped<IOrderRepositoryAdmin, OrderRepositoryAdmin>();
 builder.Services.AddScoped<IOrderServiceAdmin, OrderServiceAdmin>();
 
 
+// cart liên quan đến khách hàng
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -89,10 +100,20 @@ builder.Services.AddCors(options =>
     });
 });
 
-
+// 4. CẤP VISA CHO FRONTEND (Chỉ cần 1 cục này thôi)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+});
 
 var app = builder.Build();
-
+app.UseStaticFiles();
 // ---SEED DATA ---
 using (var scope = app.Services.CreateScope())
 {
@@ -100,7 +121,6 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<OnlineMedicineStoreCNWDbContext>();
-        // Chạy Seed Data (bên trong hàm này đã có lệnh MigrateAsync tự tạo DB)
         await DbInitializer.SeedDataAsync(context);
     }
     catch (Exception ex)
@@ -110,47 +130,28 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-
 // MIDDLEWARE BẮT LỖI TOÀN CỤC
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-// Configure the HTTP request pipeline.
+// HIỂN THỊ GIAO DIỆN WEB SWAGGER 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
+// ==========================================
+// THỨ TỰ MIDDLEWARE CHUẨN CHỈNH
+// ==========================================
 app.UseHttpsRedirection();
+
+app.UseRouting();
 
 app.UseCors("AllowAngular");
 
-app.UseAuthentication(); // Bật xác thực trước khi phân quyền
-app.UseAuthorization();  // Bật phân quyền sau khi đã xác thực
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

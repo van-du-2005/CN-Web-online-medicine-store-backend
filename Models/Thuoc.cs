@@ -52,7 +52,7 @@ namespace OnlineMedicineStoreBackend.Models
         // --- NAVIGATION PROPERTIES ---
 
         [ForeignKey("MaDanhMuc")]
-        public DanhMuc DanhMuc { get; set; } = null!;
+        public DanhMuc? DanhMuc { get; set; } = null!;
         // 1 Loại thuốc có thể xuất hiện trong nhiều Chi tiết đơn hàng
         public ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; } = new List<ChiTietDonHang>();
 
