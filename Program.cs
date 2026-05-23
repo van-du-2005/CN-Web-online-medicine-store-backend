@@ -43,6 +43,14 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddControllers();
 
+// 1. KÍCH HOẠT TÍNH NĂNG ĐỌC CONTROLLER
+builder.Services.AddControllers();
+
+// 2. KÍCH HOẠT GIAO DIỆN SWAGGER ĐỂ TEST API
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// 3. KẾT NỐI DATABASE
 builder.Services.AddDbContext<OnlineMedicineStoreCNWDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -92,8 +100,20 @@ builder.Services.AddCors(options =>
 
 
 
-var app = builder.Build();
+// 4. CẤP VISA CHO FRONTEND (Chỉ cần 1 cục này thôi)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+});
 
+var app = builder.Build();
+app.UseStaticFiles();
 // ---SEED DATA ---
 using (var scope = app.Services.CreateScope())
 {
@@ -101,7 +121,6 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<OnlineMedicineStoreCNWDbContext>();
-        // Chạy Seed Data (bên trong hàm này đã có lệnh MigrateAsync tự tạo DB)
         await DbInitializer.SeedDataAsync(context);
     }
     catch (Exception ex)
@@ -115,12 +134,16 @@ using (var scope = app.Services.CreateScope())
 // MIDDLEWARE BẮT LỖI TOÀN CỤC
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-// Configure the HTTP request pipeline.
+// HIỂN THỊ GIAO DIỆN WEB SWAGGER 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
+// ==========================================
+// THỨ TỰ MIDDLEWARE CHUẨN CHỈNH (Đừng đổi chỗ nha sếp)
+// ==========================================
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAngular");
@@ -130,28 +153,10 @@ app.UseAuthorization();  // Bật phân quyền sau khi đã xác thực
 
 app.MapControllers();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.UseStaticFiles(); // 1. Mở cửa kho cho phép đọc file tĩnh (ảnh, css...)
+app.UseRouting();     // 2. Bật định tuyến
+app.UseCors("AllowAll"); // 3. Kiểm tra thẻ Visa (CORS)
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.MapControllers(); // 4. Vào Controller lấy dữ liệu
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
