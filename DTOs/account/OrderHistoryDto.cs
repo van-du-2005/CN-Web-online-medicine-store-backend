@@ -5,6 +5,9 @@ namespace OnlineMedicineStoreBackend.DTOs.account
         public Guid MaDonHang { get; set; }
         public DateTime NgayDat { get; set; }
         public string TrangThai { get; set; } = string.Empty;
+        public decimal TamTinh { get; set; }
+        public decimal PhiVanChuyen { get; set; }
+        public decimal GiamGia { get; set; }
         public decimal ThanhToan { get; set; }
         public List<OrderDetailDto> ChiTiet { get; set; } = new();
     }

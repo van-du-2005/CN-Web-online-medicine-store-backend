@@ -9,7 +9,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.AI;
-using Mscc.GenerativeAI.Microsoft;
+using Mscc.GenerativeAI.Microsoft; 
+using OnlineMedicineStoreBackend.Repositories.admin;
+using OnlineMedicineStoreBackend.Services.admin;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,18 +46,23 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<OnlineMedicineStoreCNWDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ---------------------auth---------------
+// ---------------------đăng kí services, repository auth---------------
 builder.Services.AddMemoryCache(); // Kích hoạt Cache
 builder.Services.AddScoped<JwtUtils>();
 builder.Services.AddScoped<IUserDRepository, UserDRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>(); 
 
-// ---------------------khách hàng---------------
-
-// account liên quan đến khách hàng 
+// ---------------------đăng kí services, repository khách hàng---------------
 builder.Services.AddScoped<IAccountDRepository, AccountDRepository>();
 builder.Services.AddScoped<IAccountDService, AccountDService>();
+
+// ---------------------đăng kí services, repository admin---------------
+builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IOrderRepositoryAdmin, OrderRepositoryAdmin>();
+builder.Services.AddScoped<IOrderServiceAdmin, OrderServiceAdmin>();
+
 
 // cart liên quan đến khách hàng
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -83,6 +90,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+
+
 var app = builder.Build();
 
 // ---SEED DATA ---
@@ -101,6 +110,7 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "Có lỗi xảy ra khi khởi tạo Database.");
     }
 }
+
 
 // MIDDLEWARE BẮT LỖI TOÀN CỤC
 app.UseMiddleware<GlobalExceptionMiddleware>();

@@ -75,11 +75,16 @@ namespace OnlineMedicineStoreBackend.Services
                 MaDonHang = o.MaDonHang,
                 NgayDat = o.NgayDat,
                 TrangThai = o.TrangThai,
+                TamTinh = o.TamTinh,
+                PhiVanChuyen = o.PhiVanChuyen,
+                GiamGia = o.GiamGia,
                 ThanhToan = o.ThanhToan,
                 ChiTiet = o.ChiTietDonHangs.Select(ct => new OrderDetailDto
                 {
                     TenThuoc = ct.Thuoc?.TenThuoc ?? "Sản phẩm không xác định",
-                    HinhAnh = ct.Thuoc?.HinhAnh ?? "/anh_mi_mac_dinh.png", // Xử lý null ảnh theo yêu cầu
+                    HinhAnh = !string.IsNullOrEmpty(ct.Thuoc?.HinhAnh) 
+                                ? (ct.Thuoc.HinhAnh.StartsWith("/") ? ct.Thuoc.HinhAnh : "/" + ct.Thuoc.HinhAnh) 
+                                : "/anh_mac_dinh.png", 
                     SoLuong = ct.SoLuong,
                     DonGia = ct.DonGia
                 }).ToList()
