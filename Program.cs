@@ -151,11 +151,8 @@ app.UseCors("AllowAngular");
 app.UseAuthentication(); // Bật xác thực trước khi phân quyền
 app.UseAuthorization();  // Bật phân quyền sau khi đã xác thực
 
-app.MapControllers();
-
 app.UseStaticFiles(); // 1. Mở cửa kho cho phép đọc file tĩnh (ảnh, css...)
 app.UseRouting();     // 2. Bật định tuyến
-app.UseCors("AllowAll"); // 3. Kiểm tra thẻ Visa (CORS)
 
 app.MapControllers(); // 4. Vào Controller lấy dữ liệu
 
