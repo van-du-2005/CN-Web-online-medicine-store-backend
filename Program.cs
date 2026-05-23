@@ -98,8 +98,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-
-
 // 4. CẤP VISA CHO FRONTEND (Chỉ cần 1 cục này thôi)
 builder.Services.AddCors(options =>
 {
@@ -130,7 +128,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-
 // MIDDLEWARE BẮT LỖI TOÀN CỤC
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
@@ -142,18 +139,17 @@ if (app.Environment.IsDevelopment())
 }
 
 // ==========================================
-// THỨ TỰ MIDDLEWARE CHUẨN CHỈNH (Đừng đổi chỗ nha sếp)
+// THỨ TỰ MIDDLEWARE CHUẨN CHỈNH
 // ==========================================
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
 app.UseCors("AllowAngular");
 
-app.UseAuthentication(); // Bật xác thực trước khi phân quyền
-app.UseAuthorization();  // Bật phân quyền sau khi đã xác thực
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.UseStaticFiles(); // 1. Mở cửa kho cho phép đọc file tĩnh (ảnh, css...)
-app.UseRouting();     // 2. Bật định tuyến
-
-app.MapControllers(); // 4. Vào Controller lấy dữ liệu
+app.MapControllers();
 
 app.Run();
