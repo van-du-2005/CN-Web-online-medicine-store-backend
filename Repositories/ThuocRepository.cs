@@ -6,9 +6,9 @@ namespace OnlineMedicineStoreBackend.Repositories
 {
     public class ThuocRepository : IThuocRepository
     {
-        private readonly OnlineMedicineStoreDbContext _context;
+        private readonly OnlineMedicineStoreCNWDbContext _context;
 
-        public ThuocRepository(OnlineMedicineStoreDbContext context)
+        public ThuocRepository(OnlineMedicineStoreCNWDbContext context)
         {
             _context = context;
         }
